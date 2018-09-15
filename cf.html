@@ -1,4 +1,4 @@
-<canvas id="gc" width="600" height="600"></canvas>
+<canvas id="gc" width="400" height="400"></canvas>
 <script>
 window.onload=function() {
     canv=document.getElementById("gc");
@@ -9,7 +9,7 @@ window.onload=function() {
     setInterval(game,1000/15);
 }
 dir = 0
-turnRate = 0.3
+turnRate = 0.15
 px=py=10;
 gs=tc=20;
 ax=ay=15;
@@ -20,15 +20,58 @@ pressedLeft = false;
 pressedRight = false;
 startOfGame = true
 speed = 5
-size = 5
+size = 4
+frame = 0
+
+hashmap = {}
+
+function distance(p1, p2)
+{
+   dx = p2.x - p1.x; dx *= dx;
+   dy = p2.y - p1.y; dy *= dy;
+   return Math.sqrt( dx + dy );
+}
 
 function game() {
+  frame += 1
   
   if (startOfGame === true) {
     ctx.fillStyle="black";
     ctx.fillRect(0,0,canv.width,canv.height);
     startOfGame = false
   }
+  
+  const roundedX = Math.round(px)
+  const roundedY = Math.round(py)
+  
+  
+  if (frame - hashmap[[Math.round(px+size*Math.cos(dir + Math.PI / 2)), Math.round(py+size*Math.sin(dir + Math.PI / 2))]] > 5
+  ||  frame - hashmap[[Math.round(px+size*Math.cos(dir - Math.PI / 2)), Math.round(py+size*Math.sin(dir - Math.PI / 2))]] > 5) {
+    console.log("COLLISION");
+  } 
+  
+
+  /*
+  for(var i = 0; i < size + 1; i++) {
+    hashmap[[roundedX + i, roundedY]] = frame
+    hashmap[[roundedX - i, roundedY]] = frame
+    hashmap[[roundedX, roundedY + i]] = frame
+    hashmap[[roundedX, roundedY - i]] = frame
+    
+    hashmap[[roundedX + i, roundedY + i]] = frame
+    hashmap[[roundedX + i, roundedY - i]] = frame
+    hashmap[[roundedX - i, roundedY + i]] = frame
+    hashmap[[roundedX - i, roundedY - i]] = frame
+  }
+  */
+  
+  for (var j=px-size; j<=px+size; j++)
+     for (var k=py-size; k<=py+size; k++)
+         if (distance({x:j,y:k},{x:px,y:py}) <= size) {
+           hashmap[[Math.round(j), Math.round(k)]] = frame
+         }
+  
+  
   
   if (pressedLeft === true) {
     dir -= turnRate
@@ -37,7 +80,6 @@ function game() {
   if (pressedRight === true) {
     dir += turnRate
   }
-  
   
     px+=Math.cos(dir) * speed
     py+=Math.sin(dir) * speed
@@ -59,14 +101,58 @@ function game() {
  
     ctx.fillStyle="lime";
     
+    /*
     if (trail.length > 0)
     {
-      console.log("yo");
       ctx.beginPath();
-      ctx.arc(px,py,5,0,2*Math.PI);
+      ctx.arc(px,py,size,0,2*Math.PI);
       ctx.fillStyle = "lime";
       ctx.fill()
       //ctx.stroke();
+    }
+    */
+    
+    if (trail.length > 0)
+    {
+      /*
+      ctx.fillStyle="black";
+      ctx.fillRect(0,0,canv.width,canv.height);
+
+      ctx.arc(px,py,size,0,2*Math.PI);
+      */
+
+      //ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(px,py,size,0,2*Math.PI);
+      ctx.fillStyle="lime";
+      //ctx.fillRect(px,py,1,1);;
+      
+      ctx.fillStyle="red";
+      //ctx.fillRect(px+size*Math.cos(dir + Math.PI / 2),py+size*Math.sin(dir + Math.PI / 2),1,1);
+      //ctx.fillRect(px+size*Math.cos(dir - Math.PI / 2),py+size*Math.sin(dir - Math.PI / 2),1,1);
+      /*
+      for(var i = 0; i < size; i++) {
+        ctx.fillRect(px+i,py,1,1);
+        ctx.fillRect(px-i,py,1,1);
+        ctx.fillRect(px,py+i,1,1);
+        ctx.fillRect(px,py-i,1,1);
+        
+        ctx.fillRect(px+i,py+i,1,1);
+        ctx.fillRect(px+i,py-i,1,1);
+        ctx.fillRect(px-i,py+i,1,1);
+        ctx.fillRect(px-i,py-i,1,1);
+      }
+      */
+      /*
+      for (var j=px-size; j<=px+size; j++)
+         for (var k=py-size; k<=py+size; k++)
+             if (distance({x:j,y:k},{x:px,y:py}) <= size) {
+               ctx.fillRect(j,k,1,1);
+             }
+      */
+      
+      ctx.fillStyle = "red";
+      ctx.fill()
     }
     
 
