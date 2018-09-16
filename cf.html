@@ -22,6 +22,12 @@ startOfGame = true
 speed = 5
 size = 4
 frame = 0
+hole = false
+holeFrame = 0
+holeChance = 0.01
+holeSize = 5
+oldPx = 10
+oldPy = 10
 
 hashmap = {}
 
@@ -35,6 +41,20 @@ function distance(p1, p2)
 function game() {
   frame += 1
   
+  if (hole === true) {
+    if (holeFrame < holeSize) {
+      holeFrame += 1  
+    }
+    else {
+      hole = false
+      holeFrame = 0
+    }
+  }
+  
+  if (hole === false && Math.random() < holeChance) {
+    hole = true
+  }
+  
   if (startOfGame === true) {
     ctx.fillStyle="black";
     ctx.fillRect(0,0,canv.width,canv.height);
@@ -45,9 +65,10 @@ function game() {
   const roundedY = Math.round(py)
   
   
-  if (frame - hashmap[[Math.round(px+size*Math.cos(dir + Math.PI / 2)), Math.round(py+size*Math.sin(dir + Math.PI / 2))]] > 5
-  ||  frame - hashmap[[Math.round(px+size*Math.cos(dir - Math.PI / 2)), Math.round(py+size*Math.sin(dir - Math.PI / 2))]] > 5) {
+  if (hole === false && (frame - hashmap[[Math.round(px+size*Math.cos(dir + Math.PI / 2)), Math.round(py+size*Math.sin(dir + Math.PI / 2))]] > 5
+  ||  frame - hashmap[[Math.round(px+size*Math.cos(dir - Math.PI / 2)), Math.round(py+size*Math.sin(dir - Math.PI / 2))]] > 5)) {
     console.log("COLLISION");
+    speed = 0
   } 
   
 
@@ -65,11 +86,13 @@ function game() {
   }
   */
   
-  for (var j=px-size; j<=px+size; j++)
-     for (var k=py-size; k<=py+size; k++)
-         if (distance({x:j,y:k},{x:px,y:py}) <= size) {
-           hashmap[[Math.round(j), Math.round(k)]] = frame
-         }
+  if (hole === false) {
+    for (var j=px-size; j<=px+size; j++)
+    for (var k=py-size; k<=py+size; k++)
+    if (distance({x:j,y:k},{x:px,y:py}) <= size) {
+      hashmap[[Math.round(j), Math.round(k)]] = frame
+    }
+  }
   
   
   
@@ -80,6 +103,9 @@ function game() {
   if (pressedRight === true) {
     dir += turnRate
   }
+  
+  oldPx = px
+  oldPy = py
   
     px+=Math.cos(dir) * speed
     py+=Math.sin(dir) * speed
@@ -112,8 +138,6 @@ function game() {
     }
     */
     
-    if (trail.length > 0)
-    {
       /*
       ctx.fillStyle="black";
       ctx.fillRect(0,0,canv.width,canv.height);
@@ -122,12 +146,22 @@ function game() {
       */
 
       //ctx.stroke();
+      
+
+      
       ctx.beginPath();
       ctx.arc(px,py,size,0,2*Math.PI);
       ctx.fillStyle="lime";
+      ctx.fill()
+      
+      if (hole === true) {
+        ctx.beginPath();
+        ctx.arc(oldPx,oldPy,size+1,0,2*Math.PI);
+        ctx.fillStyle="black";
+        ctx.fill()
+      }
       //ctx.fillRect(px,py,1,1);;
       
-      ctx.fillStyle="red";
       //ctx.fillRect(px+size*Math.cos(dir + Math.PI / 2),py+size*Math.sin(dir + Math.PI / 2),1,1);
       //ctx.fillRect(px+size*Math.cos(dir - Math.PI / 2),py+size*Math.sin(dir - Math.PI / 2),1,1);
       /*
@@ -151,36 +185,12 @@ function game() {
              }
       */
       
-      ctx.fillStyle = "red";
-      ctx.fill()
-    }
-    
+
 
     
-    
-    for(var i=0;i<trail.length;i++) {
-        //ctx.fillRect(trail[i].x*gs,trail[i].y*gs,gs-2,gs-2);
-        ctx.beginPath();
-        ctx.arc(trail[i].x*gs,trail[i].y*gs,3,0,2*Math.PI);
-        ctx.fillStyle = "red";
-        ctx.fill();
-        ctx.stroke();
-        if(trail[i].x==px && trail[i].y==py) {
-            tail = 5;
-        }
-    }
-    trail.push({x:px,y:py});
-    while(trail.length>tail) {
-    trail.shift();
-    }
+
  
-    if(ax==px && ay==py) {
-        tail++;
-        ax=Math.floor(Math.random()*tc);
-        ay=Math.floor(Math.random()*tc);
-    }
-    ctx.fillStyle="red";
-    ctx.fillRect(ax*gs,ay*gs,gs-2,gs-2);
+    
 }
 function keyPush(evt) {
     switch(evt.keyCode) {
